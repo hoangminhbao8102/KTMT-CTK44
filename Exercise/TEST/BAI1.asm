@@ -1,0 +1,13 @@
+.MODEL SMALL
+.STACK
+.DATA
+.CODE
+    MOV AX,@DATA
+    MOV DS,AX
+     
+    MOV AX,0FFFFh
+    NEG AX
+    
+    MOV AH,4CH
+    INT 21H
+END
