@@ -16,4 +16,4 @@ Hoc kì I - Năm 2 (2021 - 2022)<br>
 <strong>Giáo viên hướng dẫn thực hành:</strong> Thầy ThS. Nguyễn Văn Huy Dũng<br>
 <br>
 Link Github: <a href="https://github.com/hoangminhbao8102/KTMT-CTK44">hoangminhbao8102/KTMT-CTK44</a><br>
-<h1 style="color:red;">SẮP HOÀN THÀNH</h1>
+<h1 style="color:red;">ĐÃ HOÀN THÀNH</h1>
