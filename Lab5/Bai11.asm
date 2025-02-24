@@ -1,7 +1,7 @@
 .MODEL SMALL
 .STACK 100h
 .DATA
-    MSG1 DB 13,10, 'Nhap so thu nhat: $'
+    MSG1 DB 'Nhap so thu nhat: $'
     MSG2 DB 13,10, 'Nhap so thu hai: $'
     MSG3 DB 13,10, 'Phan thuong duoc luu tren BX la: $'
     MSG4 DB 13,10, 'Phan du duoc luu tren CX la: $'

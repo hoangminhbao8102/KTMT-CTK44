@@ -6,7 +6,7 @@
     promptWidth  DB 13,10,'Nhap chieu rong: $'
     msgPerimeter DB 13,10,'Chu vi hinh chu nhat la: $'
     msgArea      DB 13,10,'Dien tich hinh chu nhat la: $'
-    inputBuffer  DB 6, ?, 5 DUP('$')  ; Bo dem de luu du lieu nhap vao
+    inputBuffer  DB 6, ?, 5 DUP(0)  ; Buffer de nhap so toi da 5 chu so + ky tu ket thuc
     length       DW ?
     width        DW ?
     area         DW ?
@@ -61,7 +61,6 @@ MAIN PROC
     MOV AH, 09h
     INT 21h
 
-    ; Chuyen chu vi sang chuoi de in
     MOV AX, perimeter
     CALL PrintNumber
 
@@ -70,7 +69,6 @@ MAIN PROC
     MOV AH, 09h
     INT 21h
 
-    ; Chuyen dien tich sang chuoi de in
     MOV AX, area
     CALL PrintNumber
 
@@ -80,9 +78,10 @@ MAIN PROC
 
 ; Ham chuyen doi chuoi so thanh so nguyen
 ConvertToNumber PROC
-    XOR AX, AX        ; Dat AX = 0
-    MOV CX, 0         ; Dat CX = 0 (CX se luu so luong chu so)
+    XOR AX, AX        ; AX = 0 (Luu gia tri so nguyen)
+    MOV CX, 0         ; CX se dem so chu so nhap vao
     MOV BX, 10        ; He co so 10
+    MOV CL, inputBuffer+1  ; Lay do dai chuoi nhap vao (so chu so thuc te)
 
     ConvertLoop:
         MOV DL, [SI]      ; Doc ky tu tu chuoi
@@ -90,50 +89,51 @@ ConvertToNumber PROC
         JB DoneConvert    ; Neu khong phai so, thoat vong lap
         CMP DL, '9'
         JA DoneConvert    ; Neu khong phai so, thoat vong lap
-        SUB DL, '0'       ; Chuyen ky tu thanh so
-        MOV AH, 0         ; Xoa thanh ghi AH
-        MOV AL, DL        ; Dat gia tri so vao AL
-        ADD AX, CX        ; AX = AX + CX
-        MOV CX, AX        ; Luu gia tri hien tai cua AX vao CX
+        SUB DL, '0'       ; Chuyen ky tu thanh so (0 -> 9)
+        
+        MOV AH, 0         ; Dua so ve dang 16-bit
+        PUSH DX           ; Luu gia tri so hien tai vao stack
+        MUL BX            ; AX = AX * 10 (Dich vi tri chu so)
+        POP DX            ; Lay lai so da doc
+        ADD AX, DX        ; Cong gia tri so vao tong
+        
         INC SI            ; Di chuyen den ky tu tiep theo
-        JMP ConvertLoop   ; Lap lai
+        LOOP ConvertLoop  ; Tiep tuc vong lap neu con ky tu
     
     DoneConvert:
-        MOV AX, CX        ; Dua gia tri cuoi cung tu CX vao AX
         RET
 ConvertToNumber ENDP
 
-; Ham dd in so ra man hinh
+; Ham in so ra man hinh
 PrintNumber PROC
     MOV BX, 10         ; He co so 10
-    XOR CX, CX         ; Dat so luong chu so da in = 0
+    XOR CX, CX         ; Dem so luong chu so
 
-    ; Xu ly so 0 dac biet
+    ; Xu ly truong hop AX = 0
     CMP AX, 0
-    JE PrintZero
+    JNE PrintLoop
+
+    MOV DL, '0'
+    MOV AH, 02h
+    INT 21h            ; In ky tu '0'
+    RET
 
     ; Chia AX cho 10 va luu du vao stack
     PrintLoop:
         XOR DX, DX         ; Xoa DX
         DIV BX             ; Chia AX cho 10
-        ADD DL, '0'        ; Chuyen du sang ky tu
+        ADD DL, '0'        ; Chuyen du thanh ky tu
         PUSH DX            ; Luu ky tu vao stack
         INC CX             ; Tang so luong ky tu
         CMP AX, 0
         JNE PrintLoop
     
-        ; In cac ky tu da luu
+    ; In cac ky tu da luu trong stack
     PrintStackLoop:
         POP DX
         MOV AH, 02h
         INT 21h            ; In ky tu
         LOOP PrintStackLoop
-        RET
-    
-    PrintZero:
-        MOV DL, '0'
-        MOV AH, 02h
-        INT 21h            ; In ky tu 0
         RET
 PrintNumber ENDP
 
