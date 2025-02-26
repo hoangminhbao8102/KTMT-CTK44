@@ -97,23 +97,47 @@
 
     ; Chuyen doi so nguyen thanh chuoi nhi phan (ham con)
     IntegerToBinaryString PROC
-        MOV CX, 16        ; So bit can chuyen doi
+        MOV CX, 16        ; S? bit c?n chuy?n d?i
         LEA DI, outputBuffer
-        ADD DI, 16        ; Di chuyen con tro den cuoi buffer
-        MOV BYTE PTR [DI], '$'
+        ADD DI, 16        ; Di chuy?n con tr? d?n cu?i buffer
+        MOV BYTE PTR [DI], '$'  ; K?t thúc chu?i v?i ký t? '$'
         DEC DI
+        
+        MOV BX, AX  ; Luu giá tr? g?c d? ki?m tra s? 0
+        MOV SI, 0   ; Bi?n d?m d? ki?m tra s? 0 ? d?u
     
     BinaryConvertLoop2:
         XOR DX, DX
-        SHL AX, 1         ; Dich trai AX de lay bit cao nhat
-        RCL DX, 1         ; Lay bit cao nhat vào DX
+        SHL AX, 1         ; D?ch trái AX d? l?y bit cao nh?t
+        RCL DX, 1         ; L?y bit cao nh?t vào DX
         ADD DL, '0'
+        
+        CMP DL, '1'       
+        JNE SkipZero      ; N?u là '0' và chua g?p '1' thì b? qua
+        
+        MOV SI, 1         ; Ðánh d?u dã g?p s? '1'
+    SkipZero:
+        CMP SI, 1
+        JE StoreBit       ; N?u dã g?p s? '1', luu vào buffer
+        DEC CX
+        JNZ BinaryConvertLoop2
+        JMP EndConversion
+    
+    StoreBit:
         MOV [DI], DL
         DEC DI
         DEC CX
         JNZ BinaryConvertLoop2
     
+    EndConversion:
+        CMP SI, 0         ; N?u toàn b? s? là 0, ghi ít nh?t m?t s? 0
+        JNE Done
+        MOV BYTE PTR [DI], '0'
+        DEC DI
+    
+    Done:
         RET
     IntegerToBinaryString ENDP
+
 
 END
